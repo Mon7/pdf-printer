@@ -1,0 +1,35 @@
+<html>
+  <head>
+  <script type='text/javascript'>
+    load_printers = function() {
+      var printers = applet.get_printers();
+      var select = document.getElementById("printers");
+      for(var i = 0; i < printers.length; i++) {
+        var option = document.createElement('option');
+        option.innerHTML = printers[i]
+        select.appendChild(option);
+      }
+    };
+    print = function() {
+      var printerName = document.getElementById("printers").value;
+      applet.load(printerName);
+    }
+  </script>
+  </head>
+  <body onload="load_printers()">
+
+    <!---<applet id="applet" codebase="/" width="0" height='0' code='PrintPDFApplet.class' archive='PrintPDFApplet.jar'>
+      <param name="pdf" value="/pdf/1.pdf"/>
+      </applet>-->
+    <object id='applet' type="application/x-java-applet" data="PrintPDFApplet.jar" width="0" height="0">
+      <param name="pdf" value="/pdf/1.pdf" />
+      <param name="code" value="PrintPDFApplet.class" />
+      <param name="archive" value"pdfbox-app-1.6.0.jar" />
+    </object>
+    <a href="./PrintPDFApplet.class">Dowload</a>
+    <select id="printers">
+      <option>...</option>
+    </select>
+    <button onclick='print()'>Skriv ut</button>
+  </body>
+</html>
