@@ -10,7 +10,9 @@ import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
 
-import com.sun.pdfview.*;
+//import com.sun.pdfview.*;
+import org.apache.pdfbox.pdmodel.*;
+
 
 /**
  * This applet can be used to load and print a PDF from the browser with
@@ -29,32 +31,20 @@ import com.sun.pdfview.*;
  */
 public class PrintPDFApplet extends Applet {
 
-  private com.sun.pdfview.PDFFile pdf;
-  private String callback;
-
-  public void init() {
-    System.out.println("Start print job");
-
-    callback = getParameter("callback");
-    if (getParameter("pdf")!=null) {
-      load(getParameter("pdf"));
-    }
-  }
-
-  /**
-   *      * Initialize the PrintRequestAttributeSet based on any default print options
-   *           * set in the PDF, such as duplex, number of copies etc.
-   *                */
+ // private com.sun.pdfview.PDFFile pdf;
+  private PDDocument pdf;
 
   /**
    * Load a PDF
    * @param filename the URL of the filename (relative to the current document)
    */
-  public void load(String filename) {
-    System.out.println("Start load");
+  public void load(String printerName) {
     try {
       URL url = new URL(getDocumentBase(), getParameter("pdf"));
-      InputStream in = url.openStream();
+      error("start load pdf");
+      pdf = PDDocument.load(url.openStream());
+      error("loaded pdf");
+      /*InputStream in = url.openStream();
       int size = 4096;
       int offset = 0;
       byte[] buffer = new byte[size];
@@ -66,16 +56,11 @@ public class PrintPDFApplet extends Applet {
         System.arraycopy(buffer, 0, new_buff, 0, buffer.length);
         buffer = new_buff;
       } while (read == size);
-      System.out.println(buffer.length);
       ByteBuffer bb = ByteBuffer.allocate(buffer.length);
       bb.put(buffer, 0, buffer.length);
-      System.out.println("new buffer");
       pdf = new PDFFile(bb);
-      System.out.println("new pdf");
-      if (callback!=null) {
-        reportLoaded();
-      }
-      print();
+      java.util.Iterator iterator = pdf.getMetadataKeys();*/
+      print(printerName);
     } catch (Exception e) {
       error(e.toString());
     }
@@ -98,45 +83,75 @@ public class PrintPDFApplet extends Applet {
     try {
       // This method requires the "plugin.jar" supplied with the JRE
       // to be in your ClassPath.
-      netscape.javascript.JSObject.getWindow(this).call(callback, new Object[0] );
+      netscape.javascript.JSObject.getWindow(this).call(null, new Object[0] );
     } catch (Throwable e) {
     }
   }
 
-  public void print() {
+  public String[] get_printers() {
+    PrintRequestAttributeSet attr_set = new HashPrintRequestAttributeSet();
+    DocFlavor doc_flavor = DocFlavor.SERVICE_FORMATTED.PAGEABLE;
+
+    PrintService[] services = PrintServiceLookup.lookupPrintServices(doc_flavor, attr_set);
+    String[] names = new String[services.length];
+    for(int i = 0; i < services.length; i++) {
+      names[i] = services[i].getName();
+    }
+    return names;
+  }
+
+  private PrintService getPrintService(String printerName) {
+    PrintRequestAttributeSet attr_set = new HashPrintRequestAttributeSet();
+    DocFlavor doc_flavor = DocFlavor.SERVICE_FORMATTED.PAGEABLE;
+
+    PrintService[] services = PrintServiceLookup.lookupPrintServices(doc_flavor, attr_set);
+    for(int i = 0; i < services.length; i++) {
+      if(printerName.equals(services[i].getName())) {
+        return services[i];
+      }
+    }
+    return null;
+  }
+  public void print(String printerName) {
     if (pdf==null) {
       error("PDF not loaded");
     } else {
       try {
-        PrintRequestAttributeSet atts = new HashPrintRequestAttributeSet();
-        DocFlavor flavor = DocFlavor.SERVICE_FORMATTED.PAGEABLE;
-
+        PrintService printService = getPrintService(printerName);
+        if (printService == null) {
+          error("Fanns ingen matchande skrivare");
+          return;
+        }
         //initializePrintAttributes(atts, pdf);
 
         // Create Print Job.
         // We set the margins to 0, on the default 8.5 x 11 paper
 
-        PDFPrintPage pages = new PDFPrintPage(pdf);
-
         PrinterJob pjob = PrinterJob.getPrinterJob();
-        PageFormat pfDefault = PrinterJob.getPrinterJob().defaultPage();
-        Paper defaultPaper = new Paper();
-        defaultPaper.setImageableArea(0, 0, defaultPaper.getWidth(), defaultPaper.getHeight());
-        pfDefault.setPaper(defaultPaper);
-        pjob.setJobName("file");
+        pjob.setPrintService(printService);
+        pjob.setJobName(pdf.getDocumentInformation().getTitle());
+
+        /*PDFPrintPage pages = new PDFPrintPage(pdf);
+        PageFormat pfDefault = pjob.defaultPage();
+        Paper paper = new Paper();
+        PDFPage page = pdf.getPage(0);
+        paper.setSize(page.getWidth(), page.getHeight());
+        error(Float.toString(pdf.getPageBox().getHeight()));
+        error(Float.toString(page.getHeight()));
+        error(Float.toString(page.getWidth()));
+        paper.setImageableArea(0, 0, page.getHeight(), page.getWidth());
+        pfDefault.setPaper(paper);
+        pjob.setJobName(pdf.getMetadataKeys("Title"));
         // validate the page against the chosen printer to correct
         // paper settings and margins
-        pfDefault = pjob.validatePage(pfDefault);
-        Book book = new Book();
+        // Book book = new Book();
+        // book.append(pages, pf, pdfFile.getNumPages());
+        // pjob.setPageable(book);
+        pjob.setPrintable(pages, pfDefault);*/
+        error(pdf.getDocumentInformation().getTitle());
 
-        book.append(pages, pfDefault, pdf.getNumPages());
-        pjob.setPageable(book);
-
-        try {
-          pjob.print();
-        } catch (PrinterException exc) {
-          System.out.println(exc);
-        }
+        pdf.print();
+        pdf.close();
       } catch (Exception e) {
         error(e.toString());
       }
@@ -144,7 +159,6 @@ public class PrintPDFApplet extends Applet {
   }
 
   private void error(String message) {
-    System.out.println("ERROR: "+message);
     JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
   }
 }
