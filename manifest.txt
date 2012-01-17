@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: pdfbox-app-1.6.0.jar log4j-1.2.16.jar
-Created-By: 1.6.0 (Sun Microsystems Inc.)
