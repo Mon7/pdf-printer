@@ -1,5 +1,6 @@
 <html>
   <head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
   <script type='text/javascript'>
     load_printers = function() {
       var applet = document.getElementById("findPrinterApplet")
@@ -28,17 +29,19 @@
       applet.appendChild(pdf);
       document.body.appendChild(applet);
     }
+    $(function() {
+        load_printers()
+    })
   </script>
   </head>
-  <body onload="load_printers()">
+  <body>
 
-    <applet id="findPrinterApplet"  width="0" height='0' code='FindPrintersService' archive='applets/PrintPDFApplet.jar'>
-      </applet>
+    <applet id="findPrinterApplet" width="0" height='0' code='FindPrintersService' archive='applets/PrintPDFApplet.jar'>
+    </applet>
     <!---<object id='applet' type="application/x-java-applet" data='applets/PrintPDFApplet.jar' width="0" height="0">
       <param name="pdf" value="/pdf/1.pdf" />
       <param name="code" value="PrintPDFApplet" />
     </object>-->
-    <a href="./PrintPDFApplet.class">Dowload</a>
     <select id="printers">
     </select>
     <button onclick='print()'>Skriv ut</button>
