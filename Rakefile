@@ -1,6 +1,5 @@
 task :build => :clean do
   system 'unzip libs/pdfbox-app-1.6.0.jar -d target'
-  #system 'unzip libs/commons-logging-1.1.1.jar -d target'
   system 'javac -d target -cp "libs/*" src/*.java'
   system 'cp src/*.properties target/'
   system 'cd target && jar cvf ../applets/PrintPDFApplet.jar *'
