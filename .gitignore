@@ -3,3 +3,6 @@ META-INF/*
 .DS_STORE
 *.swp
 pdfbox/*
+*.class
+applets/
+target/
