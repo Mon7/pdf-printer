@@ -1,14 +1,12 @@
 task :build => :clean do
-  system 'unzip libs/pdfbox-app-1.6.0.jar -d target'
+  system 'unzip -q libs/pdfbox-app-1.6.0.jar -d target'
   system 'javac -d target -cp "libs/*" src/*.java'
+  next if $?.exitstatus != 0
   system 'cp src/*.properties target/'
   system 'cd target && jar cvf ../applets/PrintPDFApplet.jar *'
   exec 'jarsigner -keystore ~/myKeyStore applets/PrintPDFApplet.jar me'
 end
 
-task :compile do
-  system 'javac -d target -cp "libs/*" src/*.java'
-end
 task :clean do
   system 'rm -rf target'
   system 'rm -rf applets'
