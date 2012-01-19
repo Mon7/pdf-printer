@@ -3,9 +3,12 @@ task :build => :clean do
   system 'javac -d target -cp "libs/*" src/*.java'
   system 'cp src/*.properties target/'
   system 'cd target && jar cvf ../applets/PrintPDFApplet.jar *'
-  #exec 'jarsigner -keystore ~/myKeyStore applets/PrintPDFApplet.jar me'
+  exec 'jarsigner -keystore ~/myKeyStore applets/PrintPDFApplet.jar me'
 end
 
+task :compile do
+  system 'javac -d target -cp "libs/*" src/*.java'
+end
 task :clean do
   system 'rm -rf target'
   system 'rm -rf applets'

@@ -1,3 +1,4 @@
+import netscape.javascript.*;
 import java.awt.print.*;
 import javax.print.*;
 import javax.print.attribute.*;
@@ -61,6 +62,11 @@ public class PrintPDFApplet extends Applet {
     }
     return null;
   }
+  private void reportProgress() {
+    String callback = getParameter("callback");
+    if (callback != null)
+      netscape.javascript.JSObject.getWindow(this).call(callback, null);
+  }
   public void print(PDDocument pdf, String printerName) {
     try {
       PrintService printService = getPrintService(printerName);
@@ -79,6 +85,7 @@ public class PrintPDFApplet extends Applet {
 
       pdf.silentPrint(pjob);
       pdf.close();
+      reportProgress();
     } catch (Exception e){
       error(e.toString());
     }
